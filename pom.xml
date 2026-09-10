@@ -206,7 +206,7 @@
                         <image>eclipse-temurin:21-jre-jammy</image>
                     </from>
                     <to>
-                        <image>kazeemakinrinde/justhumanresource</image>
+                        <image>kazeemakinrinde/justhumanresourcenasd</image>
                         <!-- Remove hardcoded credentials -->
                         <!-- <auth>...</auth> -->
                     </to>
