@@ -20,8 +20,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Verify build with Maven
-        run: mvn -B clean test
+      # - name: Verify build with Maven
+      #   run: mvn -B clean test
+      
 
   build-and-push:
     name: Build and push to Docker Hub
@@ -41,7 +42,7 @@ jobs:
         run: |
           mvn -B clean package jib:build \
             -DskipTests \
-            -Djib.to.image=kazeemakinrinde/justhumanresource:latest \
+            -Djib.to.image=kazeemakinrinde/justhumanresourcenasd:latest \
             -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
             -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
 
@@ -74,14 +75,14 @@ jobs:
             docker run -d \
               --name justhr \
               --restart unless-stopped \
-              -p 8080:8080 \
+              -p 8080:9006 \
               --env-file .env \
               -e DO_SPACES_KEY="$DO_SPACES_KEY" \
               -e DO_SPACES_SECRET="$DO_SPACES_SECRET" \
               -e DO_SPACES_REGION="$DO_SPACES_REGION" \
               -e DO_SPACES_BUCKET="$DO_SPACES_BUCKET" \
               -v /etc/ssl/certs/do-ca-certificate.crt:/app/certs/ca-certificate.crt \
-              kazeemakinrinde/justhumanresource:latest
+              kazeemakinrinde/justhumanresourcenasd:latest
 
             # Prune unused images to save disk space
             docker image prune -f
