@@ -1,4 +1,5 @@
 name: build-JustHumanResource
+
 on:
   push:
     branches:
@@ -16,63 +17,70 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-#          cache: maven
+          cache: maven
 
-      - name: Install glibc
-        run: sudo apt-get update && sudo apt-get install -y libc6
+      - name: Verify build with Maven
+        run: mvn -B clean test
 
-
-  build-image:
-    name: Build and push to docker
+  build-and-push:
+    name: Build and push to Docker Hub
     runs-on: ubuntu-latest
     needs: build
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout the repository
+        uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
           java-version: '21'
+          distribution: 'temurin'
 
       - name: Build and Push with Jib
-        run: mvn -B clean package jib:build -DskipTests -Djib.to.image=kazeemakinrinde/justhumanresource:latest -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
-#        run: mvn -B clean package jib:build -Djib.to.image=kazeemakinrinde/csims:latest -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
-
+        run: |
+          mvn -B clean package jib:build \
+            -DskipTests \
+            -Djib.to.image=kazeemakinrinde/justhumanresource:latest \
+            -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
+            -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
 
   deploy:
-    name: deploy to railway
+    name: Deploy to DigitalOcean Droplet
     runs-on: ubuntu-latest
-    needs: build-image
+    needs: build-and-push
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      # Install Railway CLI
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli@latest
-
-      - name: Print Railway CLI version
-        run: railway --version
-
-      - name: Print Help
-        run: railway variables --help
-
-
-      - name: Deploy to Railway
+      - name: Deploy to Droplet via SSH
+        uses: appleboy/ssh-action@v1.0.3
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: 7edc707c-73e3-4b8b-915b-019e9d0b6114
-          RAILWAY_SERVICE_ID: justhumanresource
-        run: |
-          IMAGE_REF="kazeemakinrinde/justhumanresource:latest"
-          echo "Updating service image to: $IMAGE_REF"
-          railway variables --set "RAILWAY_SERVICE_IMAGE=$IMAGE_REF" --service $RAILWAY_SERVICE_ID
-          
-          
-          
+          DO_SPACES_KEY: ${{ secrets.DO_SPACES_KEY }}
+          DO_SPACES_SECRET: ${{ secrets.DO_SPACES_SECRET }}
+          DO_SPACES_REGION: ${{ secrets.DO_SPACES_REGION }}
+          DO_SPACES_BUCKET: ${{ secrets.DO_SPACES_BUCKET }}
+        with:
+          host: ${{ secrets.DO_DROPLET_IP }}
+          username: ${{ secrets.DO_DROPLET_USER }}
+          key: ${{ secrets.DO_SSH_KEY }}
+          envs: DO_SPACES_KEY,DO_SPACES_SECRET,DO_SPACES_REGION,DO_SPACES_BUCKET
+          script: |
+            # Pull latest image from Docker Hub
+            docker pull kazeemakinrinde/justhumanresource:latest
+            
+            # Stop and remove existing container
+            docker stop justhr || true
+            docker rm justhr || true
+
+            # Run container with environment variables and SSL volume mount
+            docker run -d \
+              --name justhr \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              --env-file .env \
+              -e DO_SPACES_KEY="$DO_SPACES_KEY" \
+              -e DO_SPACES_SECRET="$DO_SPACES_SECRET" \
+              -e DO_SPACES_REGION="$DO_SPACES_REGION" \
+              -e DO_SPACES_BUCKET="$DO_SPACES_BUCKET" \
+              -v /etc/ssl/certs/do-ca-certificate.crt:/app/certs/ca-certificate.crt \
+              kazeemakinrinde/justhumanresource:latest
+
+            # Prune unused images to save disk space
+            docker image prune -f
