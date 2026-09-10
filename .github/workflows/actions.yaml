@@ -62,6 +62,7 @@ jobs:
           host: ${{ secrets.DO_DROPLET_IP }}
           username: ${{ secrets.DO_DROPLET_USER }}
           key: ${{ secrets.DO_SSH_KEY }}
+          passphrase: ${{ secrets.DO_SSH_PASSPHRASE }}
           envs: DO_SPACES_KEY,DO_SPACES_SECRET,DO_SPACES_REGION,DO_SPACES_BUCKET
           script: |
             # Pull latest image from Docker Hub
