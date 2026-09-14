@@ -71,6 +71,23 @@ public interface KpiMeasurementRepository
             @Param("employeeId") Long employeeId,
             @Param("period") YearMonth period
     );
+
+
+    @Query("""
+       SELECT m
+       FROM KpiMeasurement m
+       JOIN FETCH m.kpi k
+       JOIN FETCH m.employee e
+       WHERE e.id = :employeeId
+       AND m.period = :period
+       AND k.impactSalary = true
+       ORDER BY k.name ASC
+       """)
+    List<KpiMeasurement> findSalaryImpactingDetailedByEmployeeAndPeriod(
+            @Param("employeeId") Long employeeId,
+            @Param("period") YearMonth period
+    );
+
     @Query("""
        SELECT m
        FROM KpiMeasurement m

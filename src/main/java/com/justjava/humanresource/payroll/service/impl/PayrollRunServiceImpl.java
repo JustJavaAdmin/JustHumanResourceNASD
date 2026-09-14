@@ -3,6 +3,7 @@ package com.justjava.humanresource.payroll.service.impl;
 import com.justjava.humanresource.core.enums.PayrollRunStatus;
 import com.justjava.humanresource.payroll.dto.PayrollItemDTO;
 import com.justjava.humanresource.payroll.dto.PayrollRunDTO;
+import com.justjava.humanresource.payroll.dto.SalaryImpactKpiSnapshotDTO;
 import com.justjava.humanresource.payroll.entity.PayrollLineItem;
 import com.justjava.humanresource.payroll.entity.PayrollPeriod;
 import com.justjava.humanresource.payroll.entity.PayrollRun;
@@ -12,6 +13,7 @@ import com.justjava.humanresource.payroll.report.dto.*;
 import com.justjava.humanresource.payroll.repositories.PayrollLineItemRepository;
 import com.justjava.humanresource.payroll.repositories.PayrollPeriodRepository;
 import com.justjava.humanresource.payroll.repositories.PayrollRunRepository;
+import com.justjava.humanresource.payroll.service.PayrollRunKpiSnapshotService;
 import com.justjava.humanresource.payroll.service.PayrollRunService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class PayrollRunServiceImpl implements PayrollRunService {
     private final PayrollRunRepository payrollRunRepository;
     private final PayrollPeriodRepository payrollPeriodRepository;
     private final PayrollLineItemRepository payrollLineItemRepository;
+    private final PayrollRunKpiSnapshotService payrollRunKpiSnapshotService;
 
     @Override
     public PayrollRunDTO getPayrollRun(Long payrollRunId) {
@@ -155,6 +158,13 @@ public class PayrollRunServiceImpl implements PayrollRunService {
         // (employer pension = employee pension x 1.25).
         double employerPension = pension * 1.25;
 
+        // Audit-safe KPI display: read from the payroll-run KPI snapshot only,
+        // never from live KpiMeasurement/KpiDefinition data. This is what keeps
+        // the employee self-service current payroll page showing exactly what
+        // was used at calculation time, even for past runs.
+        List<SalaryImpactKpiSnapshotDTO> salaryImpactKpis =
+                payrollRunKpiSnapshotService.getSnapshotsForPayrollRun(run.getId());
+
         return PayrollRunDTO.builder()
                 .payrollRunId(run.getId())
                 .employeeId(run.getEmployee().getId())
@@ -173,6 +183,8 @@ public class PayrollRunServiceImpl implements PayrollRunService {
                 .ytdNet(run.getYtdNet())
                 .ytdPaye(run.getYtdPaye())
                 .pensionScheme(run.getAppliedPensionSchemeName())
+                .salaryKpiScore(run.getSalaryKpiScore())
+                .salaryImpactKpis(salaryImpactKpis)
                 .allowances(allowances)
                 .deductions(deductions)
                 .build();

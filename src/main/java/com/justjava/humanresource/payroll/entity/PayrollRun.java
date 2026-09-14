@@ -119,6 +119,10 @@ public class PayrollRun extends BaseEntity {
     @Column(precision = 19, scale = 2)
     private BigDecimal grossDifference;
 
+
+    @Column(name = "salary_kpi_score", precision = 7, scale = 2)
+    private BigDecimal salaryKpiScore;
+
     /**
      * Free-text reason recorded when this run is an AMENDMENT.
      * Null for ORIGINAL runs. Populated by the initiating action (e.g.

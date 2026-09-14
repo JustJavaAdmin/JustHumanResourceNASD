@@ -2,6 +2,7 @@ package com.justjava.humanresource.utils;
 
 import com.justjava.humanresource.payroll.entity.PaySlipDTO;
 import com.justjava.humanresource.payroll.entity.PaySlipLineDTO;
+import com.justjava.humanresource.payroll.dto.SalaryImpactKpiSnapshotDTO;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -41,6 +42,20 @@ public class PaySlipPdfService {
             renderer.text("Pension Scheme: " + value(paySlip.getAppliedPensionSchemeName()));
             renderer.text("Bank: " + bank(paySlip));
             renderer.gap(10);
+
+            List<SalaryImpactKpiSnapshotDTO> salaryImpactKpis = paySlip.getSalaryImpactKpis();
+            if (salaryImpactKpis != null && !salaryImpactKpis.isEmpty()) {
+                renderer.section("Salary KPI");
+                renderer.tableHeader("KPI", "Score");
+                for (SalaryImpactKpiSnapshotDTO kpi : salaryImpactKpis) {
+                    renderer.tableRow(value(kpi.getKpiName()), percent(kpi.getScore()));
+                }
+                if (salaryImpactKpis.size() > 1 && paySlip.getSalaryKpiScore() != null) {
+                    renderer.tableRow("Applied salary KPI score", percent(paySlip.getSalaryKpiScore()));
+                }
+                renderer.text("This payslip was calculated using the salary-impact KPI score.");
+                renderer.gap(8);
+            }
 
             renderer.section("Pension Contributions");
             renderer.tableHeader("Description", "Amount");
@@ -128,6 +143,14 @@ public class PaySlipPdfService {
         format.setMinimumFractionDigits(2);
         format.setMaximumFractionDigits(2);
         return "NGN " + format.format(safe);
+    }
+
+    private static String percent(BigDecimal value) {
+        BigDecimal safe = value != null ? value : BigDecimal.ZERO;
+        NumberFormat format = NumberFormat.getNumberInstance(Locale.US);
+        format.setMinimumFractionDigits(2);
+        format.setMaximumFractionDigits(2);
+        return format.format(safe) + "%";
     }
 
     private static String value(Object value) {

@@ -455,6 +455,31 @@
                 th:text="${#temporals.format(latestPaySlip.payrollDate, 'MMMM yyyy')}">February 2026</span>
         </div>
 
+        <!-- Salary KPI -->
+        <div th:if="${latestPaySlip.salaryImpactKpis != null and not #lists.isEmpty(latestPaySlip.salaryImpactKpis)}"
+             class="mb-5 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <span class="text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">Salary KPI</span>
+            <span th:if="${latestPaySlip.salaryKpiScore != null and #lists.size(latestPaySlip.salaryImpactKpis) > 1}"
+                  class="text-xs font-semibold text-blue-700 dark:text-blue-300">
+              Applied score:
+              <span th:text="${#numbers.formatDecimal(latestPaySlip.salaryKpiScore, 0, 'COMMA', 2, 'POINT')}">0.00</span>%
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div th:each="kpi : ${latestPaySlip.salaryImpactKpis}"
+                 class="flex justify-between text-sm">
+              <span th:text="${kpi.kpiName}">Monthly Target</span>
+              <span class="font-semibold">
+                <span th:text="${#numbers.formatDecimal(kpi.score, 0, 'COMMA', 2, 'POINT')}">60.00</span>%
+              </span>
+            </div>
+          </div>
+          <p class="mt-2 text-xs text-blue-700 dark:text-blue-300">
+            This payslip was calculated using the salary-impact KPI score.
+          </p>
+        </div>
+
         <!-- Gross / Net headline figures -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5 p-4 bg-gray-50 dark:bg-gray-750 rounded-xl">
           <div>
@@ -820,6 +845,30 @@
         </div>
       </div>
 
+      <!-- Salary KPI Section -->
+      <div th:if="${latestPaySlip.salaryImpactKpis != null and not #lists.isEmpty(latestPaySlip.salaryImpactKpis)}"
+           class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <h5 class="text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">Salary KPI</h5>
+          <span th:if="${latestPaySlip.salaryKpiScore != null and #lists.size(latestPaySlip.salaryImpactKpis) > 1}"
+                class="text-xs font-semibold text-blue-700 dark:text-blue-300">
+            Applied salary KPI score:
+            <span th:text="${#numbers.formatDecimal(latestPaySlip.salaryKpiScore, 0, 'COMMA', 2, 'POINT')}">0.00</span>%
+          </span>
+        </div>
+        <div class="space-y-1">
+          <div th:each="kpi : ${latestPaySlip.salaryImpactKpis}" class="flex justify-between text-sm">
+            <span th:text="${kpi.kpiName}">Monthly Target</span>
+            <span class="font-medium">
+              <span th:text="${#numbers.formatDecimal(kpi.score, 0, 'COMMA', 2, 'POINT')}">60.00</span>%
+            </span>
+          </div>
+        </div>
+        <p class="mt-2 text-xs text-blue-700 dark:text-blue-300">
+          This payslip was calculated using the salary-impact KPI score.
+        </p>
+      </div>
+
       <!-- Pension Contributions Section -->
       <div class="mb-4">
         <h5 class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">Pension Contributions</h5>
@@ -980,6 +1029,30 @@
             <p class="text-xs text-gray-500">Pension Scheme</p>
             <p th:text="${payslip.appliedPensionSchemeName}">Active scheme during run</p>
           </div>
+        </div>
+
+        <!-- Salary KPI Section -->
+        <div th:if="${payslip.salaryImpactKpis != null and not #lists.isEmpty(payslip.salaryImpactKpis)}"
+             class="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <h5 class="text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">Salary KPI</h5>
+            <span th:if="${payslip.salaryKpiScore != null and #lists.size(payslip.salaryImpactKpis) > 1}"
+                  class="text-xs font-semibold text-blue-700 dark:text-blue-300">
+              Applied salary KPI score:
+              <span th:text="${#numbers.formatDecimal(payslip.salaryKpiScore, 0, 'COMMA', 2, 'POINT')}">0.00</span>%
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div th:each="kpi : ${payslip.salaryImpactKpis}" class="flex justify-between text-sm">
+              <span th:text="${kpi.kpiName}">Monthly Target</span>
+              <span class="font-medium">
+                <span th:text="${#numbers.formatDecimal(kpi.score, 0, 'COMMA', 2, 'POINT')}">60.00</span>%
+              </span>
+            </div>
+          </div>
+          <p class="mt-2 text-xs text-blue-700 dark:text-blue-300">
+            This payslip was calculated using the salary-impact KPI score.
+          </p>
         </div>
 
         <!-- Pension Contributions Section -->

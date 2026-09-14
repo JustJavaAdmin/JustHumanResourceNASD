@@ -63,6 +63,15 @@ public class PayrollRunDTO {
     private BigDecimal ytdPaye = BigDecimal.ZERO;
 
     /* =========================
+       SALARY KPI (audit snapshot display only — never part of totals)
+       ========================= */
+
+
+    private BigDecimal salaryKpiScore;
+
+    private List<SalaryImpactKpiSnapshotDTO> salaryImpactKpis;
+
+    /* =========================
        PAYROLL COMPONENTS
        ========================= */
 
@@ -96,5 +105,11 @@ public class PayrollRunDTO {
         this.grossPay = grossPay;
         this.totalDeductions = totalDeductions;
         this.netPay = netPay;
+
+    }
+
+
+    public boolean hasSalaryImpactKpi() {
+        return salaryImpactKpis != null && !salaryImpactKpis.isEmpty();
     }
 }

@@ -447,6 +447,11 @@ public class PayrollController {
                                 .status(ps.getStatus())
                                 .bankName(ps.getBankName())
                                 .bankAccountNumber(ps.getBankAccountNumber())
+                                .salaryKpiScore(ps.getSalaryKpiScore())
+                                .salaryImpactKpis(ps.getSalaryImpactKpis())
+                                .jobGradeName(ps.getJobGradeName())
+                                .companyLogoData(ps.getCompanyLogoData())
+                                .companyLogoContentType(ps.getCompanyLogoContentType())
                                 .build();
                     })
                     .toList();

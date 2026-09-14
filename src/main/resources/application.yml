@@ -103,6 +103,7 @@ app:
   kpi:
     max-kpi-weight: ${MAX_KPI_WEIGHT:1.0}
 
+
 fam:
   api:
     base-url: ${FAM_API_BASE_URL:}

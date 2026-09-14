@@ -263,38 +263,58 @@ public class KpiMeasurementService {
 
 
     @Transactional(readOnly = true)
-    public BigDecimal getEmployeeKpiScore(
+    public List<KpiMeasurement> getSalaryImpactingMeasurementsForEmployee(
             Long employeeId,
             YearMonth period
     ) {
 
+        if (employeeId == null)
+            throw new IllegalArgumentException("EmployeeId is required");
+
+        if (period == null)
+            throw new IllegalArgumentException("Period is required");
+
         List<KpiMeasurement> measurements =
-                measurementRepository.findByEmployee_IdAndPeriod(employeeId, period);
+                measurementRepository.findSalaryImpactingDetailedByEmployeeAndPeriod(employeeId, period);
 
-        System.out.println(" Is measurements empty? " + measurements.isEmpty() + " while period==" + period);
+        if (measurements.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        // Filter to only the KPIs that are flagged to impact salary
-        List<KpiMeasurement> salaryImpacting = measurements.stream()
-                .filter(m -> m.getKpi().isImpactSalary())
-                .collect(Collectors.toList());
+        return measurements;
+    }
 
-        System.out.println(" Salary-impacting measurements count: " + salaryImpacting.size());
 
-        if (salaryImpacting.isEmpty()) {
+    public BigDecimal calculateSalaryImpactScore(List<KpiMeasurement> salaryImpactingMeasurements) {
+
+        if (salaryImpactingMeasurements == null || salaryImpactingMeasurements.isEmpty()) {
             return BigDecimal.valueOf(100); // neutral fallback – no penalty
         }
 
         BigDecimal total = BigDecimal.ZERO;
 
-        for (KpiMeasurement m : salaryImpacting) {
+        for (KpiMeasurement m : salaryImpactingMeasurements) {
             total = total.add(m.getScore());
         }
 
         return total.divide(
-                BigDecimal.valueOf(salaryImpacting.size()),
+                BigDecimal.valueOf(salaryImpactingMeasurements.size()),
                 2,
                 RoundingMode.HALF_UP
         );
+    }
+
+
+    @Transactional(readOnly = true)
+    public BigDecimal getEmployeeKpiScore(
+            Long employeeId,
+            YearMonth period
+    ) {
+
+        List<KpiMeasurement> salaryImpacting =
+                getSalaryImpactingMeasurementsForEmployee(employeeId, period);
+
+        return calculateSalaryImpactScore(salaryImpacting);
     }
 
     /* =====================================================

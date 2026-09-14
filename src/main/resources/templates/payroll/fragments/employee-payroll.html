@@ -820,6 +820,26 @@
                     </div>
                 </div>
 
+                <!-- Salary KPI Section -->
+                <div th:if="${ps.salaryImpactKpis != null and not #lists.isEmpty(ps.salaryImpactKpis)}"
+                     style="margin-bottom:1rem;padding:0.6rem 0.75rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
+                    <h5 style="font-size:0.72rem;font-weight:600;color:#1e40af;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.5rem;">Salary KPI</h5>
+                    <div th:each="kpi : ${ps.salaryImpactKpis}" class="ps-pay-item" style="font-size:0.875rem;">
+                        <span th:text="${kpi.kpiName}">Monthly Target</span>
+                        <span style="font-weight:600;">
+                            <span th:text="${#numbers.formatDecimal(kpi.score, 0, 'COMMA', 2, 'POINT')}">60.00</span>%
+                        </span>
+                    </div>
+                    <div th:if="${ps.salaryKpiScore != null and #lists.size(ps.salaryImpactKpis) > 1}"
+                         style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:600;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid #bfdbfe;color:#1d4ed8;">
+                        <span>Applied salary KPI score</span>
+                        <span><span th:text="${#numbers.formatDecimal(ps.salaryKpiScore, 0, 'COMMA', 2, 'POINT')}">70.00</span>%</span>
+                    </div>
+                    <p style="font-size:0.76rem;color:#1d4ed8;margin:0.5rem 0 0;">
+                        This payslip was calculated using the salary-impact KPI score.
+                    </p>
+                </div>
+
                 <!-- Pension Contributions Section -->
                 <div style="margin-bottom:1rem;padding:0.6rem 0.75rem;background:#f8fafc;border:1px solid #e6e9ef;border-radius:8px;">
                     <h5 style="font-size:0.72rem;font-weight:600;color:#5f6c80;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.5rem;">Pension Contributions</h5>
@@ -982,6 +1002,26 @@
                                 <p style="font-size:0.72rem;color:#6b788b;margin:0 0 2px;">Pension Scheme</p>
                                 <p style="margin:0;" th:text="${paySlip.appliedPensionSchemeName}">—</p>
                             </div>
+                        </div>
+
+                        <!-- Salary KPI Section -->
+                        <div th:if="${paySlip.salaryImpactKpis != null and not #lists.isEmpty(paySlip.salaryImpactKpis)}"
+                             style="margin-bottom:1rem;padding:0.6rem 0.75rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;">
+                            <h5 style="font-size:0.72rem;font-weight:600;color:#1e40af;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.5rem;">Salary KPI</h5>
+                            <div th:each="kpi : ${paySlip.salaryImpactKpis}" class="ps-pay-item" style="font-size:0.875rem;">
+                                <span th:text="${kpi.kpiName}">Monthly Target</span>
+                                <span style="font-weight:600;">
+                                    <span th:text="${#numbers.formatDecimal(kpi.score, 0, 'COMMA', 2, 'POINT')}">60.00</span>%
+                                </span>
+                            </div>
+                            <div th:if="${paySlip.salaryKpiScore != null and #lists.size(paySlip.salaryImpactKpis) > 1}"
+                                 style="display:flex;justify-content:space-between;font-size:0.82rem;font-weight:600;margin-top:0.4rem;padding-top:0.4rem;border-top:1px solid #bfdbfe;color:#1d4ed8;">
+                                <span>Applied salary KPI score</span>
+                                <span><span th:text="${#numbers.formatDecimal(paySlip.salaryKpiScore, 0, 'COMMA', 2, 'POINT')}">70.00</span>%</span>
+                            </div>
+                            <p style="font-size:0.76rem;color:#1d4ed8;margin:0.5rem 0 0;">
+                                This payslip was calculated using the salary-impact KPI score.
+                            </p>
                         </div>
 
                         <!-- Pension Contributions Section -->

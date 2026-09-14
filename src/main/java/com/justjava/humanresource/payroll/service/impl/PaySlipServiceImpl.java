@@ -5,6 +5,7 @@ import com.justjava.humanresource.core.enums.PayrollRunStatus;
 import com.justjava.humanresource.hr.entity.Employee;
 import com.justjava.humanresource.hr.entity.EmployeeBankDetail;
 import com.justjava.humanresource.orgStructure.entity.Company;
+import com.justjava.humanresource.payroll.dto.SalaryImpactKpiSnapshotDTO;
 import com.justjava.humanresource.payroll.entity.*;
 import com.justjava.humanresource.payroll.enums.PayComponentType;
 import com.justjava.humanresource.payroll.enums.PayrollPeriodStatus;
@@ -13,6 +14,7 @@ import com.justjava.humanresource.payroll.repositories.PayrollLineItemRepository
 import com.justjava.humanresource.payroll.repositories.PayrollPeriodRepository;
 import com.justjava.humanresource.payroll.repositories.PayrollRunRepository;
 import com.justjava.humanresource.payroll.service.PaySlipService;
+import com.justjava.humanresource.payroll.service.PayrollRunKpiSnapshotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class PaySlipServiceImpl implements PaySlipService {
     private final PaySlipRepository paySlipRepository;
     private final PayrollPeriodRepository payrollPeriodRepository;
     private final PayrollLineItemRepository payrollLineItemRepository;
+    private final PayrollRunKpiSnapshotService payrollRunKpiSnapshotService;
 
     /* ============================================================
        GENERATE PAYSLIP (IDEMPOTENT + POSTED ONLY)
@@ -393,6 +396,12 @@ public class PaySlipServiceImpl implements PaySlipService {
 
         PayrollRun run = paySlip.getPayrollRun();
 
+        // Audit-safe KPI display: read from the payroll-run KPI snapshot only,
+        // never from live KpiMeasurement/KpiDefinition data. This is what keeps
+        // past payslips showing exactly what was used at calculation time.
+        List<SalaryImpactKpiSnapshotDTO> salaryImpactKpis =
+                payrollRunKpiSnapshotService.getSnapshotsForPayrollRun(run.getId());
+
         List<PayrollLineItem> lines =
                 payrollLineItemRepository
                         .findByPayrollRunId(run.getId());
@@ -491,6 +500,9 @@ public class PaySlipServiceImpl implements PaySlipService {
                 .appliedPensionSchemeName(run.getAppliedPensionSchemeName())
                 .pensionAmount(employeePensionAmount)
                 .employerPensionAmount(employerPensionAmount)
+
+                .salaryKpiScore(run.getSalaryKpiScore())
+                .salaryImpactKpis(salaryImpactKpis)
 
                 .jobGradeName(jobGradeName)
                 .companyLogoData(company != null ? company.getLogoData() : null)

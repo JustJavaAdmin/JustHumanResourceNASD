@@ -9,6 +9,7 @@ import com.justjava.humanresource.hr.entity.EmployeePositionHistory;
 import com.justjava.humanresource.hr.entity.JobStep;
 import com.justjava.humanresource.hr.entity.PayGroup;
 import com.justjava.humanresource.hr.repository.EmployeeRepository;
+import com.justjava.humanresource.kpi.entity.KpiMeasurement;
 import com.justjava.humanresource.kpi.service.KpiMeasurementService;
 import com.justjava.humanresource.payroll.calculation.PayGroupResolutionService;
 import com.justjava.humanresource.payroll.calculation.dto.ResolvedPayComponents;
@@ -20,6 +21,7 @@ import com.justjava.humanresource.payroll.repositories.PayrollRunRepository;
 import com.justjava.humanresource.payroll.service.EmployeePositionHistoryService;
 import com.justjava.humanresource.payroll.service.PayrollAuditService;
 import com.justjava.humanresource.payroll.service.PayrollPeriodService;
+import com.justjava.humanresource.payroll.service.PayrollRunKpiSnapshotService;
 import com.justjava.humanresource.payroll.service.PayrollSetupService;
 import com.justjava.humanresource.payroll.statutory.entity.PensionScheme;
 import com.justjava.humanresource.payroll.statutory.repositories.PensionSchemeRepository;
@@ -60,6 +62,7 @@ public class PayrollOrchestrationServiceImpl implements PayrollOrchestrationServ
     private final PayrollPeriodService payrollPeriodService;
     private final PayrollPeriodRepository payrollPeriodRepository;
     private final KpiMeasurementService kpiMeasurementService;
+    private final PayrollRunKpiSnapshotService payrollRunKpiSnapshotService;
     private final PayrollAuditService payrollAuditService;
 
     /* ============================================================
@@ -187,8 +190,8 @@ public class PayrollOrchestrationServiceImpl implements PayrollOrchestrationServ
                                 + " — period " + openPeriod.getPeriodStart()
                                 + " to " + openPeriod.getPeriodEnd()
                                 + (savedAmendment.getAmendmentReason() != null
-                                        ? ". Reason: " + savedAmendment.getAmendmentReason()
-                                        : "")
+                                ? ". Reason: " + savedAmendment.getAmendmentReason()
+                                : "")
                 );
 
                 return savedAmendment.getId();
@@ -284,11 +287,20 @@ public class PayrollOrchestrationServiceImpl implements PayrollOrchestrationServ
 
             BigDecimal configuredGross = jobStep.getGrossSalary();
 
-            BigDecimal kpiScore =
-                    kpiMeasurementService.getEmployeeKpiScore(
+            YearMonth payrollPeriod = YearMonth.from(payrollDate);
+
+            List<KpiMeasurement> salaryImpactingMeasurements =
+                    kpiMeasurementService.getSalaryImpactingMeasurementsForEmployee(
                             employee.getId(),
-                            YearMonth.from(payrollDate)
+                            payrollPeriod
                     );
+
+            BigDecimal kpiScore =
+                    kpiMeasurementService.calculateSalaryImpactScore(salaryImpactingMeasurements);
+
+            // Snapshot the exact measurements used, for audit-safe payslip display.
+            // Writes salaryKpiScore=null and no rows when the list is empty.
+            payrollRunKpiSnapshotService.replaceSnapshots(run, salaryImpactingMeasurements, kpiScore);
 
             System.out.println(" the KPI Score ===" + kpiScore);
             BigDecimal performanceFactor =
@@ -303,6 +315,13 @@ public class PayrollOrchestrationServiceImpl implements PayrollOrchestrationServ
         /* --------------------------------------------------------
            BASIC-BASED PAYROLL
            -------------------------------------------------------- */
+
+            // Basic-based payroll is not affected by KPI. Clear any snapshots
+            // that might already exist on this run (e.g. a prior gross-based
+            // calculation before a pay-model change, or a stale in-progress
+            // recalculation), so the payslip never shows an out-of-date
+            // Salary KPI section for a basic-based run.
+            payrollRunKpiSnapshotService.replaceSnapshots(run, List.of(), null);
 
             BigDecimal basicSalary = jobStep.getBasicSalary()
                     .setScale(2, RoundingMode.HALF_UP);
@@ -818,8 +837,8 @@ public class PayrollOrchestrationServiceImpl implements PayrollOrchestrationServ
                         + " to " + run.getPeriodEnd()
                         + ", net pay: " + run.getNetPay()
                         + (run.getAmendmentReason() != null
-                                ? ". Amendment reason: " + run.getAmendmentReason()
-                                : "")
+                        ? ". Amendment reason: " + run.getAmendmentReason()
+                        : "")
         );
     }
 

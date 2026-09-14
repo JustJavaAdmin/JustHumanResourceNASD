@@ -303,9 +303,14 @@ public class KpiController {
         model.addAttribute("employmentSize", assignmentsByEmployee.size()+ assignmentsByJobStep.size());
         return "kpi/fragment/kpi-assignments-fragment";
     }
+
     @PostMapping("/kpi/definition")
     public String kpiDefinition(KpiDefinition kpi) {
-        kpiDefinitionService.create(kpi);
+        if (kpi.getId() != null) {
+            kpiDefinitionService.update(kpi.getId(), kpi);
+        } else {
+            kpiDefinitionService.create(kpi);
+        }
         return "redirect:/kpi";
     }
     @PostMapping("/kpi/assign")

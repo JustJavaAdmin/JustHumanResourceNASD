@@ -199,7 +199,7 @@
         <button th:data-modal-id="|rejectModal-${request.taskId}|"
                 onclick="openModalFromData(this)"
                 class="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center text-sm font-medium">
-          <span class="material-icons-round text-sm mr-2">cancel</span> Reject request
+          <span class="material-icons-round text-sm mr-2">cancel</span> Return request
         </button>
         <button th:data-modal-id="|approveModal-${request.taskId}|"
                 onclick="openModalFromData(this)"
@@ -429,16 +429,16 @@
                 <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
                   <span class="material-icons-round text-red-600 dark:text-red-400 text-2xl">cancel</span>
                 </div>
-                <h3 class="text-xl font-bold">Reject period lock?</h3>
+                <h3 class="text-xl font-bold">Return period lock?</h3>
               </div>
               <p class="text-gray-600 dark:text-gray-300 mb-4">
-                Reject the lock request for
+                Return the lock request for
                 <strong th:text="${#temporals.format(periodStart, 'MMMM yyyy')}">this period</strong>.
                 HR will be notified and can resubmit after corrections.
               </p>
               <textarea rows="2"
                         class="w-full p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-primary-500"
-                        placeholder="Reason for rejection (optional)..."></textarea>
+                        placeholder="Reason for return (optional)..."></textarea>
               <form th:action="@{/reject/lock}" method="post">
                 <input type="hidden" name="taskId" th:value="${request.taskId}" />
                 <div class="flex justify-end space-x-3">
@@ -450,7 +450,7 @@
                   </button>
                   <button type="submit"
                           class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">
-                    Confirm rejection
+                    Confirm return
                   </button>
                 </div>
               </form>

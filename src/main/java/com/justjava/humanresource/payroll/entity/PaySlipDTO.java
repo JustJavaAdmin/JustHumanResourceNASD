@@ -2,6 +2,7 @@ package com.justjava.humanresource.payroll.entity;
 
 import com.justjava.humanresource.core.enums.PayrollRunStatus;
 import com.justjava.humanresource.payroll.dto.FutureEmployeeAllowanceDTO;
+import com.justjava.humanresource.payroll.dto.SalaryImpactKpiSnapshotDTO;
 import lombok.Builder;
 import lombok.Value;
 
@@ -48,6 +49,11 @@ public class PaySlipDTO {
     String bankName;
     String bankAccountNumber;
 
+
+    BigDecimal salaryKpiScore;
+
+    List<SalaryImpactKpiSnapshotDTO> salaryImpactKpis;
+
     /* ======================
        PDF HEADER (job grade + company logo)
        ====================== */
@@ -55,4 +61,9 @@ public class PaySlipDTO {
     String jobGradeName;
     byte[] companyLogoData;
     String companyLogoContentType;
+
+
+    public boolean hasSalaryImpactKpi() {
+        return salaryImpactKpis != null && !salaryImpactKpis.isEmpty();
+    }
 }

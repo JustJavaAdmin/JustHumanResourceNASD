@@ -113,25 +113,7 @@
         .period-stat-value { font-weight: 600; color: #1f2937; }
         .dark .period-stat-value { color: #f3f4f6; }
 
-        .view-details-btn {
-            width: 100%;
-            padding: 0.625rem;
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.75rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #2563eb;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.375rem;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .dark .view-details-btn { background-color: #111827; border-color: #374151; color: #60a5fa; }
-        .view-details-btn:hover { background-color: #2563eb; color: white; border-color: #2563eb; }
-        .dark .view-details-btn:hover { background-color: #3b82f6; color: white; }
+
 
         /* Empty state */
         .empty-state {
@@ -410,15 +392,7 @@
                         </span>
                     </div>
 
-                    <!-- View details button -->
-                    <div class="mt-4">
-                        <a class="view-details-btn"
-                           th:href="${periodId != null}
-                                       ? @{/finance/locked-periods/{id}(id=${periodId})}
-                                       : '#'">
-                            <span class="material-icons-round text-sm">visibility</span> View details
-                        </a>
-                    </div>
+
 
                 </div><!--/ period-card-body -->
             </div><!--/ th:each period-card -->
