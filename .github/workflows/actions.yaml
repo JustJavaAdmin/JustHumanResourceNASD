@@ -42,7 +42,7 @@ jobs:
         run: |
           mvn -B clean package jib:build \
             -DskipTests \
-            -Djib.to.image=kazeemakinrinde/justhumanresourcenasd:latest \
+            -Djib.to.image=kazeemakinrinde/justhumanresourcenasd:${{ github.sha }} \
             -Djib.to.auth.username=${{ secrets.DOCKER_USERNAME }} \
             -Djib.to.auth.password=${{ secrets.DOCKER_PASSWORD }}
 
@@ -66,7 +66,7 @@ jobs:
           envs: DO_SPACES_KEY,DO_SPACES_SECRET,DO_SPACES_REGION,DO_SPACES_BUCKET
           script: |
             # Pull latest image from Docker Hub
-            docker pull kazeemakinrinde/justhumanresource:latest
+            docker pull kazeemakinrinde/justhumanresourcenasd:${{ github.sha }}
             
             # Stop and remove existing container
             docker stop justhr || true
@@ -83,7 +83,7 @@ jobs:
               -e DO_SPACES_REGION="$DO_SPACES_REGION" \
               -e DO_SPACES_BUCKET="$DO_SPACES_BUCKET" \
               -v /etc/ssl/certs/do-ca-certificate.crt:/app/certs/ca-certificate.crt \
-              kazeemakinrinde/justhumanresourcenasd:latest
+              kazeemakinrinde/justhumanresourcenasd:${{ github.sha }}
 
             # Prune unused images to save disk space
             docker image prune -f
