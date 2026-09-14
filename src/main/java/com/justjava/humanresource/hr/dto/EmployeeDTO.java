@@ -63,7 +63,7 @@ public class EmployeeDTO {
     // We might also need an id to identify the bank detail record when updating (optional)
     private Long bankDetailId;
 
-    // Keycloak group(s) in mobile-auth-realm
+    // Keycloak group(s) in employees-nasd realm
     private List<String> groups;
 
 }

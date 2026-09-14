@@ -57,7 +57,7 @@ Managed under the `com.justjava.humanresource.kpi` package.
 ### 4.5. Security & Authentication
 *   **Keycloak:** Used as the Identity Provider (IdP).
 *   **OAuth2:** Secure authentication for both Web and Mobile clients.
-*   **Multi-Realm Support:** Configured for different authentication realms (e.g., `humanResources`, `mobile-auth-realm`).
+*   **Multi-Realm Support:** Configured for different authentication realms (e.g., `humanResources-nasd`, `employees-nasd`).
 
 ## 5. Key Workflows (BPMN)
 The project includes several critical business processes defined in `src/main/resources/processes`:

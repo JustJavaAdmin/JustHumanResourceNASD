@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/humanresource}
+    url: ${JDBC_DATABASE_URL:jdbc:postgresql://localhost:5432/humanresourcemaiz}
     username: ${JDBC_DATABASE_USERNAME:postgres}
     password: ${JDBC_DATABASE_PASSWORD:alaopost}
     hikari:
@@ -37,33 +37,33 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: ${ISSUER_URI:https://ngcloak-production.up.railway.app/realms/humanResources}
+            issuer-uri: ${ISSUER_URI:https://ngcloak-production.up.railway.app/realms/humanResources-nasd}
 
           keycloak-mobile:
-            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/mobile-auth-realm}
+            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/employees-nasd}
 
           keycloak-web:
-            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/mobile-auth-realm}
+            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/employees-nasd}
 
         registration:
           keycloak:
             provider: keycloak
-            client_id: ${KEYCLOAK_CLIENT_ID:humanResources}
-            client_secret: ${KEYCLOAK_CLIENT_SECRET:OrAILfmKCscBT2uUIMHntG2PRvYXg8iP}
+            client_id: ${KEYCLOAK_CLIENT_ID:humanResources-nasd}
+            client_secret: ${KEYCLOAK_CLIENT_SECRET:ckEMcfCWaCTxgVq69bXKEjfGg3DegleGl48XL6kknA2yXnyYCf4XBTiHn4bV7BU01MX1AtTunPpW3q2IIPKCwV}
             authorization-grant-type: authorization_code
             scope: openid,profile,email
 
           keycloak-mobile:
             provider: keycloak-mobile
-            client_id: ${KEYCLOAK_CLIENT_ID_E:auth-mobile}
-            client_secret: ${KEYCLOAK_CLIENT_SECRET_E:sTZZkB0OSJXpuot1QAOTTooPoG5lkElF}
+            client_id: ${KEYCLOAK_CLIENT_ID_E:employees-nasd}
+            client_secret: ${KEYCLOAK_CLIENT_SECRET_E:Qtzx43mSuBV21IHrlaHwrOROjDa8ravuGuTqZklzw6M0udy5RYVg8uSDkNE52kwCBraRlKLiTlJYXvGldotKaH}
             authorization-grant-type: authorization_code
             scope: openid,profile,email
 
           keycloak-web:
             provider: keycloak-web
-            client_id: ${KEYCLOAK_CLIENT_ID_E:auth-mobile}
-            client_secret: ${KEYCLOAK_CLIENT_SECRET_E:sTZZkB0OSJXpuot1QAOTTooPoG5lkElF}
+            client_id: ${KEYCLOAK_CLIENT_ID_E:employees-nasd}
+            client_secret: ${KEYCLOAK_CLIENT_SECRET_E:Qtzx43mSuBV21IHrlaHwrOROjDa8ravuGuTqZklzw6M0udy5RYVg8uSDkNE52kwCBraRlKLiTlJYXvGldotKaH}
             authorization-grant-type: authorization_code
             scope: openid,profile,email
 error:
@@ -86,12 +86,12 @@ springdoc:
   pathsToMatch: /api/**
 keycloak:
   base-url: ${KEYCLOAK_BASE_URI:https://ngcloak-production.up.railway.app}
-  base-realm: humanResources
-  client-id: ${KEYCLOAK_CLIENT_ID:humanResources}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:OrAILfmKCscBT2uUIMHntG2PRvYXg8iP}
-  realm: mobile-auth-realm
+  base-realm: humanResources-nasd
+  client-id: ${KEYCLOAK_CLIENT_ID:humanResources-nasd}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:ckEMcfCWaCTxgVq69bXKEjfGg3DegleGl48XL6kknA2yXnyYCf4XBTiHn4bV7BU01MX1AtTunPpW3q2IIPKCwV}
+  realm: employees-nasd
   admin-client-id: admin-cli-client
-  admin-client-secret: nolXS4BpUfMbUjcevhyx1jAB51L9fxw9
+  admin-client-secret: Z8KScAoxH7VxROnI6JdkkEL4v5YEnmPqEfUBcso1kjsbwHccOT7rkmPJxUBxbwN4SCzu7C6AiQBGOKUYwpOkNr
 
 paystack:
   secret:

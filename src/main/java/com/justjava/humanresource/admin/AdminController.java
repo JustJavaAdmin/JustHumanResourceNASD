@@ -26,7 +26,7 @@ public class AdminController {
     KeycloakAdminService keycloakAdminService;
 
     /** Primary realm this admin panel operates on. */
-    @Value("humanResources")
+    @Value("humanResources-nasd")
     private String realmName;
 
     private static final int DEFAULT_PAGE_SIZE = 10;

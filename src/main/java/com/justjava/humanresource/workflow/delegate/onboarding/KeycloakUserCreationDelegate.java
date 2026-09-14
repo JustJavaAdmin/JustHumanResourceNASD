@@ -86,7 +86,7 @@ public class KeycloakUserCreationDelegate implements JavaDelegate {
         try {
 
             String keycloakUserId = keycloakAdminService.createUser(
-                    "mobile-auth-realm",
+                    "employees-nasd",
                     username,
                     email,
                     temporaryPassword,
@@ -101,7 +101,7 @@ public class KeycloakUserCreationDelegate implements JavaDelegate {
             List<String> groups = (List<String>) execution.getVariable("groups");
             Assert.notEmpty(groups, "groups process variable is required — at least one group must be selected");
             for (String groupName : groups) {
-                keycloakAdminService.addUserToGroup("mobile-auth-realm", keycloakUserId, groupName);
+                keycloakAdminService.addUserToGroup("employees-nasd", keycloakUserId, groupName);
             }
 
 
@@ -121,7 +121,7 @@ public class KeycloakUserCreationDelegate implements JavaDelegate {
 
 
             try {
-                keycloakAdminService.sendPasswordResetEmail("humanResources", keycloakUserId);
+                keycloakAdminService.sendPasswordResetEmail("humanResources-nasd", keycloakUserId);
             } catch (Exception emailEx) {
                 log.error("Password reset email failed for employeeId={}, keycloakUserId={} — " +
                                 "user is fully provisioned; email must be resent manually",

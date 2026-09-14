@@ -23,18 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-/**
- * HTTP surface for the local asset catalog, consumed by the "Manage Assets"
- * modal on the employee request page. Spring Security permits all of
- * {@code /api/**} through, so {@link #assertAssetManager()} is the only thing
- * actually protecting the management endpoints below.
- * <p>
- * Note: {@link AuthenticationManager} here is
- * {@code com.justjava.humanresource.aau.AuthenticationManager} — the
- * mobile-auth-realm one that actually knows about {@code /assetManager} —
- * not {@code com.justjava.humanresource.core.config.AuthenticationManager},
- * which only ever sees humanResources-realm claims.
- */
+
 @RestController
 @RequestMapping("/api/assets")
 @RequiredArgsConstructor
