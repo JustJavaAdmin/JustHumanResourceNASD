@@ -41,6 +41,30 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
        """)
     Page<Employee> findEmployeesWithAnyKpiMeasurement(Pageable pageable);
 
+
+    @Query("""
+       SELECT DISTINCT e
+       FROM Employee e
+       WHERE EXISTS (
+            SELECT 1
+            FROM KpiMeasurement m
+            WHERE m.employee.id = e.id
+            AND m.period BETWEEN :start AND :end
+       )
+       AND NOT EXISTS (
+            SELECT 1
+            FROM EmployeeAppraisal a
+            WHERE a.employee.id = e.id
+            AND a.cycle.id = :cycleId
+       )
+       """)
+    Page<Employee> findEmployeesEligibleForAppraisal(
+            @Param("start") java.time.YearMonth start,
+            @Param("end") java.time.YearMonth end,
+            @Param("cycleId") Long cycleId,
+            Pageable pageable
+    );
+
     @Query("""
        SELECT DISTINCT e
        FROM Employee e

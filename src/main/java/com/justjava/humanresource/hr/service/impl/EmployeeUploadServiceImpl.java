@@ -283,6 +283,7 @@ public class EmployeeUploadServiceImpl implements EmployeeUploadService {
         employee.setJobStep(step);
         employee.setPayGroup(payGroup);
         employee.setEmail(dto.getEmail());
+        employee.setKpiEnabled(true);
 
         // Optional fields that may be present in the CSV
         if (dto.getPhoneNumber()   != null) employee.setPhoneNumber(dto.getPhoneNumber());

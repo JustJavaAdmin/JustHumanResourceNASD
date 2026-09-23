@@ -5,6 +5,7 @@ import com.justjava.humanresource.hr.repository.EmployeeRepository;
 import com.justjava.humanresource.kpi.entity.AppraisalCycle;
 import com.justjava.humanresource.kpi.repositories.AppraisalCycleRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@Slf4j
 @Component("batchStartAppraisalDelegate")
 @RequiredArgsConstructor
 @Transactional
@@ -26,6 +28,7 @@ public class BatchStartAppraisalDelegate implements JavaDelegate {
     private final EmployeeRepository employeeRepository;
     private final RuntimeService runtimeService;
     private final AppraisalCycleRepository cycleRepository;
+    private final AppraisalProcessLauncher appraisalProcessLauncher;
 
     @Override
     public void execute(DelegateExecution execution) {
@@ -36,20 +39,33 @@ public class BatchStartAppraisalDelegate implements JavaDelegate {
         AppraisalCycle cycle =
                 cycleRepository.findById(cycleId)
                         .orElseThrow();
-        System.out.println("Circle ID: ============================" + cycleId);
+
+        log.info("Starting appraisal batch for cycle id={} ({}, {} - {})",
+                cycleId, cycle.getName(), cycle.getStartPeriod(), cycle.getEndPeriod());
 
         int page = 0;
+        int startedCount = 0;
+        int skippedNotEnabled = 0;
+        int skippedAlreadyActive = 0;
+        int failedCount = 0;
         Page<Employee> result;
 
         do {
 
-            result = employeeRepository.findEmployeesWithAnyKpiMeasurement(
+            result = employeeRepository.findEmployeesEligibleForAppraisal(
+                    cycle.getStartPeriod(),
+                    cycle.getEndPeriod(),
+                    cycleId,
                     PageRequest.of(page, BATCH_SIZE)
             );
+
             for (Employee employee : result.getContent()) {
 
-                if (!employee.isKpiEnabled())
+                if (!employee.isKpiEnabled()) {
+                    skippedNotEnabled++;
+                    log.debug("Skipping employee {} - kpiEnabled is false", employee.getId());
                     continue;
+                }
 
                 String businessKey =
                         "APPRAISAL_" + employee.getId()
@@ -63,23 +79,32 @@ public class BatchStartAppraisalDelegate implements JavaDelegate {
                                 .active()
                                 .count() > 0;
 
-                if (!exists) {
+                if (exists) {
+                    skippedAlreadyActive++;
+                    log.debug("Active appraisal process already exists for employee {} (businessKey={})",
+                            employee.getId(), businessKey);
+                    continue;
+                }
 
-                    runtimeService.startProcessInstanceByKey(
-                            "employeeAppraisalProcess",
+                try {
+                    appraisalProcessLauncher.startAppraisal(
                             businessKey,
                             Map.of(
                                     "employeeId", employee.getId(),
                                     "cycleId", cycleId,
-                                    "managerComplete",false,
-                                    "selfComplete",false
+                                    "managerComplete", false,
+                                    "selfComplete", false
                             )
                     );
-                }
 
-                cycle.setProcessedEmployees(
-                        cycle.getProcessedEmployees() + 1
-                );
+                    cycle.setProcessedEmployees(cycle.getProcessedEmployees() + 1);
+                    startedCount++;
+
+                } catch (Exception ex) {
+                    failedCount++;
+                    log.error("Failed to start appraisal for employee {} in cycle {}: {}",
+                            employee.getId(), cycleId, ex.getMessage(), ex);
+                }
             }
 
             page++;
@@ -88,7 +113,11 @@ public class BatchStartAppraisalDelegate implements JavaDelegate {
 
         cycle.setCompleted(true);
         cycle.setCompletedAt(LocalDateTime.now());
-
         cycleRepository.save(cycle);
+
+        log.info("Appraisal batch finished for cycle id={}. started={}, skippedNotEnabled={}, " +
+                        "skippedAlreadyActive={}, failed={}, processedEmployees={}",
+                cycleId, startedCount, skippedNotEnabled, skippedAlreadyActive, failedCount,
+                cycle.getProcessedEmployees());
     }
 }
