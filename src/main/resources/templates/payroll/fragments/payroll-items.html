@@ -175,23 +175,6 @@
             </div>
 
         </div>
-
-        <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800
-            rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
-            <p class="font-semibold mb-1 flex items-center gap-1">
-                <span class="material-icons-round text-sm">table_chart</span>
-                Expected CSV format:
-            </p>
-            <pre class="font-mono">email,itemType,itemCode,overrideAmount
-jane.doe@justjava.com,ALLOWANCE,ALL-HOUSING,50000
-jane.doe@justjava.com,DEDUCTION,DED-PENSION,15000
-john.smith@justjava.com,TAX_RELIEF,TR-CRA,10000</pre>
-            <p class="mt-1 text-blue-600 dark:text-blue-400">
-                The first row (header) is always skipped. Emails must be lowercase. <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">itemType</code>
-                must be <strong>ALLOWANCE</strong>, <strong>DEDUCTION</strong>, or <strong>TAX_RELIEF</strong>.
-                Any row with an uppercase email, or an email that doesn't exist, is reported as an error and the whole upload is blocked until fixed.
-            </p>
-        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
