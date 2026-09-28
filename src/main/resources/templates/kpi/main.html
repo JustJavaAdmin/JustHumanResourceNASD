@@ -1007,7 +1007,7 @@
             </div>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
                 Select a KPI and period, then upload a CSV with two columns:
-                <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">employeeId</code> and
+                <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">email</code> and
                 <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">actualValue</code>.
                 Existing measurements for the same employee / KPI / period will be <strong>overridden</strong>.
             </p>
@@ -1108,12 +1108,13 @@
                     <span class="material-icons-round text-sm">table_chart</span>
                     Expected CSV format:
                 </p>
-                <pre class="font-mono">employeeId,actualValue
-12,85.00
-14,92.50</pre>
+                <pre class="font-mono">email,actualValue
+jane.doe@justjava.com,85.00
+john.smith@justjava.com,92.50</pre>
                 <p class="mt-1 text-blue-600 dark:text-blue-400">
-                    The first row (header) is always skipped. Employee IDs that don't exist are reported
-                    as errors and skipped; all valid rows are still saved.
+                    The first row (header) is always skipped. Emails must be lowercase — rows with an
+                    uppercase character in the email, or an email that doesn't exist, are reported as
+                    errors and skipped; all valid rows are still saved.
                 </p>
             </div>
         </div>
@@ -2608,7 +2609,8 @@ function clearMeasurementSearch() {
 
         const dataLines = lines.slice(1); // skip header row
         const rows = [];
-        const seenIds = new Map(); // employeeId → first rowNum it appeared on
+        const seenEmails = new Map(); // email → first rowNum it appeared on
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         let hasErrors = false;
 
         dataLines.forEach((line, idx) => {
@@ -2616,17 +2618,18 @@ function clearMeasurementSearch() {
             const parts  = line.split(',').map(p => p.trim());
             const errors = [];
 
-            const rawId    = parts[0] || '';
+            const rawEmail = parts[0] || '';
             const rawValue = parts[1] || '';
 
-            // Validate employee ID
-            const empId = parseInt(rawId, 10);
-            if (!rawId || isNaN(empId) || empId <= 0) {
-                errors.push('Invalid employee ID');
-            } else if (seenIds.has(empId)) {
-                errors.push('Duplicate ID — already on row ' + seenIds.get(empId));
+            // Validate email
+            if (!rawEmail || !emailPattern.test(rawEmail)) {
+                errors.push('Invalid email address');
+            } else if (rawEmail !== rawEmail.toLowerCase()) {
+                errors.push('Email must be lowercase');
+            } else if (seenEmails.has(rawEmail)) {
+                errors.push('Duplicate email — already on row ' + seenEmails.get(rawEmail));
             } else {
-                seenIds.set(empId, rowNum);
+                seenEmails.set(rawEmail, rowNum);
             }
 
             // Validate actual value
@@ -2636,7 +2639,7 @@ function clearMeasurementSearch() {
             }
 
             if (errors.length) hasErrors = true;
-            rows.push({ rowNum, rawId, rawValue, empId, actualValue, errors });
+            rows.push({ rowNum, rawEmail, rawValue, actualValue, errors });
         });
 
         // ── Build meta subtitle ───────────────────────────────────────────────
@@ -2651,7 +2654,7 @@ function clearMeasurementSearch() {
         // ── Build table body ──────────────────────────────────────────────────
         const tbody = document.getElementById('kpiCsvPreviewTableBody');
         tbody.innerHTML = '';
-        rows.forEach(({ rowNum, rawId, rawValue, errors }) => {
+        rows.forEach(({ rowNum, rawEmail, rawValue, errors }) => {
             const ok = errors.length === 0;
             const tr = document.createElement('tr');
             tr.className = ok
@@ -2660,7 +2663,7 @@ function clearMeasurementSearch() {
 
             tr.innerHTML =
                 '<td class="px-3 py-2 text-gray-400 text-xs">' + rowNum + '</td>' +
-                '<td class="px-3 py-2 font-mono text-gray-800 dark:text-gray-200 text-xs">' + (rawId  || '<span class="text-red-400">—</span>') + '</td>' +
+                '<td class="px-3 py-2 font-mono text-gray-800 dark:text-gray-200 text-xs">' + (kpiEsc(rawEmail) || '<span class="text-red-400">—</span>') + '</td>' +
                 '<td class="px-3 py-2 font-mono text-gray-700 dark:text-gray-300 text-xs">' + (rawValue || '<span class="text-red-400">—</span>') + '</td>' +
                 '<td class="px-3 py-2">' + (ok
                     ? '<span class="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-medium"><span class="material-icons-round text-sm">check_circle</span>OK</span>'
@@ -2825,7 +2828,7 @@ function clearMeasurementSearch() {
                             <thead>
                             <tr class="bg-gray-50 dark:bg-gray-700">
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">#</th>
-                                <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Employee ID</th>
+                                <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Email</th>
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Actual Value</th>
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Status</th>
                             </tr>

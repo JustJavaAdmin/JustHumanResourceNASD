@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class EmployeePayItemUploadDTO {
 
     private int rowNumber;
-    private Long employeeId;
+    private String email;
     private String itemType;
     private String itemCode;
     private BigDecimal overrideAmount;

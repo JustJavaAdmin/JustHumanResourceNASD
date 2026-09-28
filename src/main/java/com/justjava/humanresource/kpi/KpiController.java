@@ -766,10 +766,10 @@ public class KpiController {
     @GetMapping("/kpi/measurements/csv-template")
     public ResponseEntity<ByteArrayResource> downloadCsvTemplate() {
 
-        String csv = "employeeId,actualValue\n" +
-                "12,85.00\n" +
-                "14,92.50\n" +
-                "17,100.00\n";
+        String csv = "email,actualValue\n" +
+                "jane.doe@justjava.com,85.00\n" +
+                "john.smith@justjava.com,92.50\n" +
+                "amaka.obi@justjava.com,100.00\n";
 
         byte[] bytes = csv.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 

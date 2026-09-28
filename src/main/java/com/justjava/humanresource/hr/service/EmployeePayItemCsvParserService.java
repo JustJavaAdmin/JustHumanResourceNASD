@@ -34,7 +34,16 @@ public class EmployeePayItemCsvParserService {
                 List<String> parts = parseCsvLine(line);
                 EmployeePayItemUploadDTO dto = new EmployeePayItemUploadDTO();
                 dto.setRowNumber(lineNumber);
-                dto.setEmployeeId(Long.parseLong(value(parts, 0)));
+
+                String email = value(parts, 0);
+                if (email.isEmpty() || !email.contains("@")) {
+                    throw new IllegalStateException("Row " + lineNumber + ": invalid or missing email address.");
+                }
+                if (!email.equals(email.toLowerCase())) {
+                    throw new IllegalStateException("Row " + lineNumber + ": email must be lowercase: '" + email + "'.");
+                }
+                dto.setEmail(email);
+
                 dto.setItemType(value(parts, 1));
                 dto.setItemCode(value(parts, 2));
 

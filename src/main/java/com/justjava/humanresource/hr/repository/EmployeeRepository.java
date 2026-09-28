@@ -79,7 +79,11 @@ public interface EmployeeRepository extends JpaRepository<Employee,Long> {
             @Param("period") java.time.YearMonth period, Pageable pageable
     );
 
-    Optional<Employee> findByEmail(String email);
+    @Query("SELECT e FROM Employee e WHERE LOWER(e.email) = LOWER(:email)")
+    Optional<Employee> findByEmail(@Param("email") String email);
+
+    @Query("SELECT e FROM Employee e WHERE LOWER(e.email) IN :emails")
+    List<Employee> findByEmailIn(@Param("emails") java.util.Collection<String> emails);
 
     @Query("SELECT e FROM Employee e " +
             "LEFT JOIN FETCH e.bankDetails " +

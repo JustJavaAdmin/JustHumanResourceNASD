@@ -104,41 +104,93 @@
     </script>
 
     <!-- Pay Item CSV Upload Section -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6 flex flex-col md:flex-row md:items-center gap-4">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <span class="material-icons-round text-blue-600 dark:text-blue-400">playlist_add</span>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">Bulk Upload Employee Pay Items</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">CSV: employeeId, itemType, itemCode, overrideAmount</p>
-            </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+
+        <div class="flex items-center gap-2 mb-1">
+            <span class="material-icons-round text-blue-600 dark:text-blue-400">playlist_add</span>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Bulk Upload Employee Pay Items</h3>
         </div>
-        <div class="flex flex-wrap items-end gap-3 md:ml-auto">
-            <a href="#" onclick="downloadPayItemCsvTemplate(); return false;"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-xs font-semibold hover:bg-blue-50 dark:hover:bg-blue-900/20 self-end">
-                <span class="material-icons-round text-sm">download</span>
-                Download Template
-            </a>
-            <div>
-                <label for="payItemCsvEffectiveFrom" class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Effective From</label>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5">
+            Upload a CSV with four columns:
+            <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">email</code>,
+            <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">itemType</code>,
+            <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">itemCode</code> and
+            <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">overrideAmount</code>.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+
+            <!-- Effective From -->
+            <div class="md:col-span-1">
+                <label for="payItemCsvEffectiveFrom" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Effective From *
+                </label>
                 <input type="date" id="payItemCsvEffectiveFrom"
-                       class="text-xs border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-2.5 py-1.5" />
+                       class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
             </div>
-            <div>
-                <label for="payItemCsvEffectiveTo" class="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1">Effective To <span class="text-gray-400">(optional)</span></label>
+
+            <!-- Effective To -->
+            <div class="md:col-span-1">
+                <label for="payItemCsvEffectiveTo" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Effective To <span class="text-gray-400 font-normal">(optional)</span>
+                </label>
                 <input type="date" id="payItemCsvEffectiveTo"
-                       class="text-xs border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 rounded-lg px-2.5 py-1.5" />
+                       class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border-0 rounded-lg
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm" />
             </div>
-            <input type="file" id="payItemCsvFileInput" accept=".csv"
-                   class="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0
-                      file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700
-                      hover:file:bg-blue-100 cursor-pointer self-end" />
-            <button type="button" onclick="uploadPayItemsCsv()" id="payItemCsvUploadBtn"
-                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm self-end">
-                <span class="material-icons-round text-sm">cloud_upload</span>
-                Upload Pay Items
-            </button>
+
+            <!-- File picker -->
+            <div class="md:col-span-2">
+                <label for="payItemCsvFileInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    CSV File *
+                </label>
+                <input type="file" id="payItemCsvFileInput" accept=".csv,text/csv"
+                       class="w-full text-sm text-gray-600 dark:text-gray-300
+                              file:mr-3 file:py-1.5 file:px-3
+                              file:rounded-lg file:border-0
+                              file:text-sm file:font-medium
+                              file:bg-blue-50 file:text-blue-700
+                              hover:file:bg-blue-100
+                              dark:file:bg-blue-900/30 dark:file:text-blue-300
+                              cursor-pointer" />
+            </div>
+
+            <!-- Action buttons -->
+            <div class="md:col-span-1 flex flex-col gap-2">
+                <button type="button" onclick="uploadPayItemsCsv()" id="payItemCsvUploadBtn"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg
+                               hover:bg-blue-700 text-sm font-medium flex items-center
+                               justify-center gap-1 transition-colors">
+                    <span class="material-icons-round text-sm">preview</span>
+                    Preview &amp; Upload
+                </button>
+                <a href="#" onclick="downloadPayItemCsvTemplate(); return false;"
+                   class="w-full text-center text-sm text-blue-600 hover:text-blue-800
+                          dark:text-blue-400 dark:hover:text-blue-200 flex items-center
+                          justify-center gap-1 py-1">
+                    <span class="material-icons-round text-sm">download</span>
+                    Download sample template
+                </a>
+            </div>
+
+        </div>
+
+        <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800
+            rounded-lg p-3 text-xs text-blue-700 dark:text-blue-300">
+            <p class="font-semibold mb-1 flex items-center gap-1">
+                <span class="material-icons-round text-sm">table_chart</span>
+                Expected CSV format:
+            </p>
+            <pre class="font-mono">email,itemType,itemCode,overrideAmount
+jane.doe@justjava.com,ALLOWANCE,ALL-HOUSING,50000
+jane.doe@justjava.com,DEDUCTION,DED-PENSION,15000
+john.smith@justjava.com,TAX_RELIEF,TR-CRA,10000</pre>
+            <p class="mt-1 text-blue-600 dark:text-blue-400">
+                The first row (header) is always skipped. Emails must be lowercase. <code class="bg-blue-100 dark:bg-blue-800/40 px-1 rounded">itemType</code>
+                must be <strong>ALLOWANCE</strong>, <strong>DEDUCTION</strong>, or <strong>TAX_RELIEF</strong>.
+                Any row with an uppercase email, or an email that doesn't exist, is reported as an error and the whole upload is blocked until fixed.
+            </p>
         </div>
     </div>
 
@@ -884,7 +936,7 @@
                             <thead>
                             <tr class="bg-gray-50 dark:bg-gray-700">
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">#</th>
-                                <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Employee ID</th>
+                                <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Email</th>
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Item Type</th>
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Item Code</th>
                                 <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-600">Override Amount</th>
@@ -1122,10 +1174,10 @@ function editAllowance(id) {
 
         function downloadPayItemCsvTemplate() {
             const template =
-    'employeeId,itemType,itemCode,overrideAmount\n' +
-    '12,ALLOWANCE,ALL-HOUSING,50000\n' +
-    '12,DEDUCTION,DED-PENSION,15000\n' +
-    '14,TAX_RELIEF,TR-CRA,10000\n';
+    'email,itemType,itemCode,overrideAmount\n' +
+    'jane.doe@justjava.com,ALLOWANCE,ALL-HOUSING,50000\n' +
+    'jane.doe@justjava.com,DEDUCTION,DED-PENSION,15000\n' +
+    'john.smith@justjava.com,TAX_RELIEF,TR-CRA,10000\n';
             const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -1179,27 +1231,32 @@ function editAllowance(id) {
             let hasErrors = false;
             const seen = new Set();
             const validTypes = ['ALLOWANCE', 'DEDUCTION', 'TAX_RELIEF'];
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
             dataLines.forEach(function(line, idx) {
-const parts = line.split(',').map(p => p.trim());
-const employeeId = parts[0] || '';
-const itemType = (parts[1] || '').toUpperCase();
-const itemCode = (parts[2] || '').toUpperCase();
-const overrideAmount = parts[3] || '';
+                const parts = line.split(',').map(p => p.trim());
+                const email = parts[0] || '';
+                const itemType = (parts[1] || '').toUpperCase();
+                const itemCode = (parts[2] || '').toUpperCase();
+                const overrideAmount = parts[3] || '';
 
-const errors = [];
-if (!employeeId || isNaN(Number(employeeId)) || Number(employeeId) <= 0) errors.push('employeeId must be a valid positive number');
-if (!validTypes.includes(itemType)) errors.push('itemType must be ALLOWANCE, DEDUCTION, or TAX_RELIEF');
-if (!itemCode) errors.push('itemCode is required');
-if (!overrideAmount || isNaN(Number(overrideAmount)) || Number(overrideAmount) < 0) {
-    errors.push('overrideAmount must be provided and >= 0');
-}
-const uniqueKey = employeeId + '|' + itemType + '|' + itemCode;
-if (seen.has(uniqueKey)) errors.push('Duplicate row in file');
-seen.add(uniqueKey);
+                const errors = [];
+                if (!email || !emailPattern.test(email)) {
+                    errors.push('email must be a valid email address');
+                } else if (email !== email.toLowerCase()) {
+                    errors.push('email must be lowercase');
+                }
+                if (!validTypes.includes(itemType)) errors.push('itemType must be ALLOWANCE, DEDUCTION, or TAX_RELIEF');
+                if (!itemCode) errors.push('itemCode is required');
+                if (!overrideAmount || isNaN(Number(overrideAmount)) || Number(overrideAmount) < 0) {
+                    errors.push('overrideAmount must be provided and >= 0');
+                }
+                const uniqueKey = email + '|' + itemType + '|' + itemCode;
+                if (seen.has(uniqueKey)) errors.push('Duplicate row in file');
+                seen.add(uniqueKey);
 
-if (errors.length > 0) hasErrors = true;
-rows.push({ idx: idx + 1, employeeId, itemType, itemCode, overrideAmount, errors });
+                if (errors.length > 0) hasErrors = true;
+                rows.push({ idx: idx + 1, email, itemType, itemCode, overrideAmount, errors });
             });
 
             const tbody = document.getElementById('payItemCsvPreviewTableBody');
@@ -1210,7 +1267,7 @@ rows.push({ idx: idx + 1, employeeId, itemType, itemCode, overrideAmount, errors
                 tr.className = ok ? 'hover:bg-gray-50 dark:hover:bg-gray-750' : 'bg-red-50 dark:bg-red-900/10';
   tr.innerHTML =
     '<td class="px-3 py-2 text-gray-400 text-xs">' + row.idx + '</td>' +
-    '<td class="px-3 py-2 text-xs font-mono text-gray-700 dark:text-gray-300">' + esc(row.employeeId) + '</td>' +
+    '<td class="px-3 py-2 text-xs font-mono text-gray-700 dark:text-gray-300">' + esc(row.email) + '</td>' +
     '<td class="px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300">' + esc(row.itemType) + '</td>' +
     '<td class="px-3 py-2 text-xs text-gray-700 dark:text-gray-300">' + esc(row.itemCode) + '</td>' +
     '<td class="px-3 py-2 text-xs font-mono text-gray-700 dark:text-gray-300">' + esc(row.overrideAmount) + '</td>' +
@@ -1280,7 +1337,7 @@ rows.push({ idx: idx + 1, employeeId, itemType, itemCode, overrideAmount, errors
                             li.className = 'flex items-start gap-1.5';
                             li.innerHTML = '<span class="material-icons-round text-xs mt-0.5 flex-shrink-0">close</span>Row ' +
                                 esc(err.rowNumber) + ': ' + esc(err.message) +
-                                ' [employeeId=' + esc(err.employeeId) +
+                                ' [email=' + esc(err.email) +
                                 ', type=' + esc(err.itemType) + ', code=' + esc(err.itemCode) + ']';
                             list.appendChild(li);
                         });

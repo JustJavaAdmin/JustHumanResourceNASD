@@ -64,14 +64,17 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
             return new UploadSummary(0, 0);
         }
 
-        Set<Long> employeeIds = rows.stream()
-                .map(EmployeePayItemUploadDTO::getEmployeeId)
+        Set<String> emails = rows.stream()
+                .map(EmployeePayItemUploadDTO::getEmail)
                 .filter(Objects::nonNull)
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .filter(e -> !e.isEmpty())
                 .collect(Collectors.toSet());
 
-        Map<Long, Employee> employeeById = employeeRepository.findAllById(employeeIds)
+        Map<String, Employee> employeeByEmail = employeeRepository.findByEmailIn(emails)
                 .stream()
-                .collect(Collectors.toMap(Employee::getId, Function.identity()));
+                .collect(Collectors.toMap(e -> e.getEmail().toLowerCase(), Function.identity(), (a, b) -> a));
 
         Map<String, Allowance> allowanceByCode = allowanceRepository
                 .findByStatus(RecordStatus.ACTIVE, Sort.by(Sort.Direction.ASC, "id"))
@@ -86,10 +89,15 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
                 .stream()
                 .collect(Collectors.toMap(t -> t.getCode().toUpperCase(), Function.identity(), (a, b) -> a));
 
-        List<RowError> errors = validateRows(rows, employeeById, allowanceByCode, deductionByCode, taxReliefByCode);
+        List<RowError> errors = validateRows(rows, employeeByEmail, allowanceByCode, deductionByCode, taxReliefByCode);
         if (!errors.isEmpty()) {
             throw new PayItemUploadValidationException(errors, rows.size());
         }
+
+        // All rows are validated at this point, so every row resolves to a real employee.
+        Set<Long> employeeIds = employeeByEmail.values().stream()
+                .map(Employee::getId)
+                .collect(Collectors.toSet());
 
         // Pre-load existing employee pay items to resolve effectiveFrom
         // Key: employeeId -> list of existing records
@@ -114,7 +122,7 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
         Map<Long, List<TaxReliefAttachmentRequest>> taxReliefRequests = new LinkedHashMap<>();
 
         for (EmployeePayItemUploadDTO row : rows) {
-            Employee employee = employeeById.get(row.getEmployeeId());
+            Employee employee = employeeByEmail.get(row.getEmail().trim().toLowerCase());
             Long employeeId = employee.getId();
             String type = row.getItemType().trim().toUpperCase();
             boolean overridden = true;
@@ -191,7 +199,7 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
 
     private List<RowError> validateRows(
             List<EmployeePayItemUploadDTO> rows,
-            Map<Long, Employee> employeeById,
+            Map<String, Employee> employeeByEmail,
             Map<String, Allowance> allowanceByCode,
             Map<String, Deduction> deductionByCode,
             Map<String, TaxRelief> taxReliefByCode
@@ -203,14 +211,14 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
             String itemType = safe(row.getItemType()).toUpperCase();
             String itemCode = safe(row.getItemCode()).toUpperCase();
 
-            if (row.getEmployeeId() == null) {
-                errors.add(err(row, "employeeId is required"));
+            if (row.getEmail() == null || row.getEmail().isBlank()) {
+                errors.add(err(row, "email is required"));
                 continue;
             }
 
-            Employee employee = employeeById.get(row.getEmployeeId());
+            Employee employee = employeeByEmail.get(row.getEmail().trim().toLowerCase());
             if (employee == null) {
-                errors.add(err(row, "Employee not found"));
+                errors.add(err(row, "Employee not found for email: " + row.getEmail().trim()));
                 continue;
             }
 
@@ -258,7 +266,7 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
     private RowError err(EmployeePayItemUploadDTO row, String message) {
         return new RowError(
                 row.getRowNumber(),
-                row.getEmployeeId(),
+                safe(row.getEmail()),
                 safe(row.getItemType()),
                 safe(row.getItemCode()),
                 message
@@ -271,7 +279,7 @@ public class EmployeePayItemUploadServiceImpl implements EmployeePayItemUploadSe
 
     public record RowError(
             int rowNumber,
-            Long employeeId,
+            String email,
             String itemType,
             String itemCode,
             String message

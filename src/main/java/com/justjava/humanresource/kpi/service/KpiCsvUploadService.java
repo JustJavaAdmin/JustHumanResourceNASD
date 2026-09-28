@@ -25,15 +25,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Parses a two-column CSV (employeeId, actualValue) for a fixed KPI + period
+ * Parses a two-column CSV (email, actualValue) for a fixed KPI + period
  * chosen on the UI, and upserts each row:
  *   – if a measurement already exists  → update it (same logic as updateMeasurement)
  *   – if no measurement exists yet     → create it  (same logic as recordBulkMeasurements)
  *
  * Expected CSV format (header row is skipped):
- *   employeeId,actualValue
- *   12,85.00
- *   14,92.50
+ *   email,actualValue
+ *   jane.doe@justjava.com,85.00
+ *   john.smith@justjava.com,92.50
  */
 @Service
 @RequiredArgsConstructor
@@ -71,9 +71,9 @@ public class KpiCsvUploadService {
         for (CsvRow row : rows) {
 
             try {
-                Optional<Employee> empOpt = employeeRepository.findById(row.employeeId);
+                Optional<Employee> empOpt = employeeRepository.findByEmail(row.email);
                 if (empOpt.isEmpty()) {
-                    errors.add("Row " + row.lineNumber + ": employee ID " + row.employeeId + " not found – skipped.");
+                    errors.add("Row " + row.lineNumber + ": employee email " + row.email + " not found – skipped.");
                     continue;
                 }
 
@@ -183,20 +183,31 @@ public class KpiCsvUploadService {
 
                 if (parts.length < 2) {
                     throw new IllegalStateException(
-                            "Line " + lineNumber + " does not have 2 columns (employeeId, actualValue)."
+                            "Line " + lineNumber + " does not have 2 columns (email, actualValue)."
                     );
                 }
 
-                long       employeeId  = Long.parseLong(parts[0].trim());
+                String email = parts[0].trim();
+                if (email.isEmpty() || !email.contains("@")) {
+                    throw new IllegalStateException(
+                            "Line " + lineNumber + " has an invalid email address: '" + email + "'."
+                    );
+                }
+                if (!email.equals(email.toLowerCase())) {
+                    throw new IllegalStateException(
+                            "Line " + lineNumber + ": email must be lowercase: '" + email + "'."
+                    );
+                }
+
                 BigDecimal actualValue = new BigDecimal(parts[1].trim());
 
-                rows.add(new CsvRow(lineNumber, employeeId, actualValue));
+                rows.add(new CsvRow(lineNumber, email, actualValue));
             }
 
         } catch (IllegalStateException ex) {
             throw ex;   // re-throw parse-level errors as-is
         } catch (NumberFormatException ex) {
-            throw new IllegalStateException("CSV contains a non-numeric value: " + ex.getMessage(), ex);
+            throw new IllegalStateException("CSV contains a non-numeric actual value: " + ex.getMessage(), ex);
         } catch (Exception ex) {
             throw new IllegalStateException("Failed to read CSV file: " + ex.getMessage(), ex);
         }
@@ -231,5 +242,5 @@ public class KpiCsvUploadService {
        INNER TYPES
        ------------------------------------------------------- */
 
-    private record CsvRow(int lineNumber, long employeeId, BigDecimal actualValue) {}
+    private record CsvRow(int lineNumber, String email, BigDecimal actualValue) {}
 }
