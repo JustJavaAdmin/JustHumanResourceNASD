@@ -37,13 +37,13 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: ${ISSUER_URI:https://ngcloak-production.up.railway.app/realms/humanResources-nasd}
+            issuer-uri: ${ISSUER_URI:https://ngcloak.justjava.tech/realms/humanResources-nasd}
 
           keycloak-mobile:
-            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/employees-nasd}
+            issuer-uri: ${ISSUER_URI_E:https://ngcloak.justjava.tech/realms/employees-nasd}
 
           keycloak-web:
-            issuer-uri: ${ISSUER_URI_E:https://ngcloak-production.up.railway.app/realms/employees-nasd}
+            issuer-uri: ${ISSUER_URI_E:https://ngcloak.justjava.tech/realms/employees-nasd}
 
         registration:
           keycloak:
@@ -85,7 +85,7 @@ server:
 springdoc:
   pathsToMatch: /api/**
 keycloak:
-  base-url: ${KEYCLOAK_BASE_URI:https://ngcloak-production.up.railway.app}
+  base-url: ${KEYCLOAK_BASE_URI:https://ngcloak.justjava.tech}
   base-realm: humanResources-nasd
   client-id: ${KEYCLOAK_CLIENT_ID:humanResources-nasd}
   client-secret: ${KEYCLOAK_CLIENT_SECRET:ckEMcfCWaCTxgVq69bXKEjfGg3DegleGl48XL6kknA2yXnyYCf4XBTiHn4bV7BU01MX1AtTunPpW3q2IIPKCwV}
